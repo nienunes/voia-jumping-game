@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voia's Jumping Game</title>
+    <style>
+        canvas {
+            background-color: #f0f0f0;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+        var canvas = document.getElementById("gameCanvas");
+        var ctx = canvas.getContext("2d");
+
+        var voia = {
+            x: 50,
+            y: 350,
+            width: 50,
+            height: 50,
+            color: "blue",
+            dy: 0,
+            gravity: 0.5,
+            jumpPower: -10,
+            jumping: false
+        };
+
+        var obstacles = [];
+        var obstacleFrequency = 90; // frames
+        var frameCount = 0;
+
+        function drawVoia() {
+            ctx.fillStyle = voia.color;
+            ctx.fillRect(voia.x, voia.y, voia.width, voia.height);
+        }
+
+        function updateVoia() {
+            voia.dy += voia.gravity;
+            voia.y += voia.dy;
+            if (voia.y + voia.height > canvas.height) {
+                voia.y = canvas.height - voia.height;
+                voia.dy = 0;
+                voia.jumping = false;
+            }
+        }
+
+        function jump() {
+            if (!voia.jumping) {
+                voia.dy = voia.jumpPower;
+                voia.jumping = true;
+            }
+        }
+
+        function drawObstacle(obstacle) {
+            ctx.fillStyle = "black";
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+        }
+
+        function updateObstacle(obstacle) {
+            obstacle.x -= 5;
+            if (obstacle.x + obstacle.width < 0) {
+                obstacles.splice(obstacles.indexOf(obstacle), 1);
+            }
+        }
+
+        function generateObstacle() {
+            var obstacle = {
+                x: canvas.width,
+                y: canvas.height - 50,
+                width: 20,
+                height: 50
+            };
+            obstacles.push(obstacle);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawVoia();
+            for (var i = 0; i < obstacles.length; i++) {
+                drawObstacle(obstacles[i]);
+            }
+        }
+
+        function update() {
+            updateVoia();
+            if (frameCount % obstacleFrequency === 0) {
+                generateObstacle();
+            }
+            for (var i = 0; i < obstacles.length; i++) {
+                updateObstacle(obstacles[i]);
+            }
+            frameCount++;
+        }
+
+        function gameLoop() {
+            draw();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Space") {
+                jump();
+            }
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
